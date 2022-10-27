@@ -26,7 +26,7 @@ String version_ = "0.0.1";
 int contentLength = 0;
 bool isValidContentType = false;
 
-String deviceToken = "Y05gCljgop4awBh8w6FD";
+String deviceToken = "";
 
 String host = "thingcontrol.io"; // Host => hosted firmware.bin
 String host_ = "raw.githubusercontent.com"; // Host => hosted firmware.bin
@@ -206,7 +206,6 @@ void execOTA() {
 
 void _initGetFirmware()
 {
-  wifiClient.setInsecure();
   latestVersion();
   if (ver_compare != 0) {
     execOTA();
@@ -269,6 +268,7 @@ void setup() {
   // Calculate the distance that sound travels in one microsecond in centimeters
   distance_Per_uSec = speed_Of_Sound / 10000.0;
   deviceToken = mac2String((byte*) &espChipID);
+  String vers = "/api/v1/" + deviceToken + "/attributes?clientKeys=version"; // bin file name with a slash in front.
   Serial.begin(9600); // Open serial connection to report values to host
   Serial.println(F("Starting... Ambient Temperature/Humidity Monitor"));
   Serial.println();
@@ -276,6 +276,7 @@ void setup() {
   Serial.println(deviceToken);
   WiFiManager wifiManager;
   wifiManager.setAPCallback(configModeCallback);
+  wifiClient.setInsecure();
 
   if (!wifiManager.autoConnect("@Thingcontrol_AP")) {
     Serial.println("failed to connect and hit timeout");
