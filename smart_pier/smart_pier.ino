@@ -30,7 +30,7 @@ String deviceToken = "Y05gCljgop4awBh8w6FD";
 
 String host = "thingcontrol.io"; // Host => hosted firmware.bin
 String host_ = "raw.githubusercontent.com"; // Host => hosted firmware.bin
-String bin = "greenioiot/ultrasonic/main/ultrasonic.ino.bin"; // bin file name with a slash in front.
+String bin = "greenioiot/Smart_Pier/main/Smart_Pier.ino.bin"; // bin file name with a slash in front.
 String vers = "/api/v1/" + deviceToken + "/attributes?clientKeys=version"; // bin file name with a slash in front.
 
 int ver_compare = 0;
@@ -243,7 +243,7 @@ void latestVersion() {
     }
     check_ver = check_ver.substring(check_ver.indexOf("\"",10)+1,check_ver.lastIndexOf("\""));
     wifiClient.stop();
-    bin = "greenioiot/ultrasonic/" + check_ver + "/ultrasonic.ino.bin";
+    bin = "greenioiot/Smart_Pier/" + check_ver + "/Smart_Pier.ino.bin";
     ver_compare = check_ver.compareTo(version_);
     }
 }
