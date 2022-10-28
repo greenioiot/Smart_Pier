@@ -206,6 +206,8 @@ void execOTA() {
 
 void _initGetFirmware()
 {
+  Serial.println("_initGetFirmware");
+  client.disconnect();
   latestVersion();
   if (ver_compare != 0) {
     execOTA();
@@ -213,8 +215,11 @@ void _initGetFirmware()
 }
 
 void latestVersion() {
-  
     if (wifiClient.connect(host.c_str(), 443)) {
+      Serial.print(String("GET ") + vers + " HTTP/1.1\r\n" +
+                   "Host: " + host + "\r\n" +
+                   "Cache-Control: no-cache\r\n" +
+                   "Connection: close\r\n\r\n");
       wifiClient.print(String("GET ") + vers + " HTTP/1.1\r\n" +
                    "Host: " + host + "\r\n" +
                    "Cache-Control: no-cache\r\n" +
@@ -268,12 +273,13 @@ void setup() {
   // Calculate the distance that sound travels in one microsecond in centimeters
   distance_Per_uSec = speed_Of_Sound / 10000.0;
   deviceToken = mac2String((byte*) &espChipID);
-  String vers = "/api/v1/" + deviceToken + "/attributes?clientKeys=version"; // bin file name with a slash in front.
+  vers = "/api/v1/" + deviceToken + "/attributes?clientKeys=version"; // bin file name with a slash in front.
   Serial.begin(9600); // Open serial connection to report values to host
   Serial.println(F("Starting... Ambient Temperature/Humidity Monitor"));
   Serial.println();
   Serial.println(F("***********************************"));
   Serial.println(deviceToken);
+  Serial.println(vers);
   WiFiManager wifiManager;
   wifiManager.setAPCallback(configModeCallback);
   wifiClient.setInsecure();
@@ -287,7 +293,7 @@ void setup() {
 
   Serial.print("Start.....");
   startMillis = millis();  //initial start time
-  dayMillis = millis();
+  dayMillis = 0;
 }
 
 void loop()
@@ -311,7 +317,7 @@ void loop()
     sendtelemetry();
     starSendTeletMillis = currentMillis;  //IMPORTANT to save the start time of the current LED state.
   }
-  if (currentMillis - dayMillis >= 86400000)  //test whether the period has elapsed
+  if (currentMillis - dayMillis >= 30000)  //test whether the period has elapsed
   {
     _initGetFirmware();
     dayMillis = currentMillis;
