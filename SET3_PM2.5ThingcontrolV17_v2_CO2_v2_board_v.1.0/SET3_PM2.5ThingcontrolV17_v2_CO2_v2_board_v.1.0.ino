@@ -58,11 +58,11 @@ Scheduler runner;
 #define TFT_BURGUNDY  0xF1EE
 
 
-#define URL_fw_Version "https://raw.githubusercontent.com/greenioiot/Smart_Pier/main/SET3_PM2.5ThingcontrolV17_v2_CO2_v2_board_v.1.0.ino.esp32/bin_version.txt"
+#define URL_fw_Version "https://raw.githubusercontent.com/greenioiot/Smart_Pier/main/SET3_PM2.5ThingcontrolV17_v2_CO2_v2_board_v.1.0/bin_version.txt"
 
-#define URL_fw_Bin "https://raw.githubusercontent.com/greenioiot/Smart_Pier/main/SET3_PM2.5ThingcontrolV17_v2_CO2_v2_board_v.1.0.ino.esp32/firmware.bin"
+#define URL_fw_Bin "https://raw.githubusercontent.com/greenioiot/Smart_Pier/main/SET3_PM2.5ThingcontrolV17_v2_CO2_v2_board_v.1.0/firmware.bin"
 
-String FirmwareVer = "0.0.0";
+String FirmwareVer = "0.0.1";
 
 
 int xpos = 0;
@@ -80,7 +80,7 @@ int countC = 0;
 
 String nccidStr = "";
 
-
+int Reset = 0;
 Adafruit_MLX90614 mlx = Adafruit_MLX90614();
 
 int error;
@@ -411,13 +411,20 @@ void getIP(String IP, String Port, String Data) {
     AISnb.receive_UDP(resp);
     Serial.print("waitData:");
     Serial.println(resp.data);
+    if (resp.data == 0 ) {
+       Reset ++;
+      Serial.print("NOData : "+String(Reset));
+      
+      if (Reset > 30){
+          ESP.restart();
+      }
+    }
     if (udp.status == false) {
       connectWifi = true;
       break;
     } else {
       for (int x = 0; x < resp.data.length(); x += 2) {
         char c = char_to_byte(resp.data[x]) << 4 | char_to_byte(resp.data[x + 1]);
-
         json += c;
       }
       //Serial.println(json);
@@ -629,6 +636,7 @@ void errorTimeDisplay(int i) {
 
 void setup() {
   Serial.begin(115200);
+  
   EEPROM.begin(512);
   _initLCD();
   initBaseLine();
@@ -851,6 +859,8 @@ void composeJson() {
   json.concat(",\"voc\":");
   json.concat(sgp.TVOC);
 
+
+  
   json.concat(",\"rssi\":");
   if (connectWifi == false) {
     json.concat(meta.rssi);
@@ -1089,6 +1099,9 @@ void t5CallSendAttribute() {
   attr.concat("\",\"NCCID\":");
   attr.concat("\"");
   attr.concat(NCCID);
+  attr.concat("\",\"ver\":");
+  attr.concat("\"");
+  attr.concat(FirmwareVer);
   attr.concat("\"}");
   UDPSend udp = AISnb.sendUDPmsgStr(serverIP, serverPort, attr);
 }
